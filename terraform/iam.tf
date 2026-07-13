@@ -23,7 +23,3 @@ resource "aws_iam_instance_profile" "mongodb_profile" {
   role = aws_iam_role.mongodb_role.name
 }
 
-resource "aws_iam_role_policy_attachment" "admin" {
-  role       = aws_iam_role.mongodb_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-}

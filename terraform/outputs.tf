@@ -33,3 +33,7 @@ output "mongodb_public_ip" {
 output "ecr_repository_url" {
   value = aws_ecr_repository.todo_api.repository_url
 }
+
+output "backup_bucket_name" {
+  value = aws_s3_bucket.mongodb_backup.bucket
+}

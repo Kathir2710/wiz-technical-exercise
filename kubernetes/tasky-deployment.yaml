@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: tasky
+  namespace: wiz
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: tasky
+
+  template:
+    metadata:
+      labels:
+        app: tasky
+
+    spec:
+      containers:
+      - name: tasky
+
+        image: 369504341517.dkr.ecr.ap-south-1.amazonaws.com/tasky:latest
+
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 8080
+
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: tasky-secret
+              key: MONGODB_URI
+
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tasky-secret
+              key: SECRET_KEY
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 5
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"

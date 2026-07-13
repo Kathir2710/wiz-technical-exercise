@@ -1,0 +1,36 @@
+name: Deploy to Amazon EKS
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Image"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region ${{ secrets.AWS_REGION }} \
+            --name wiz-eks
+
+      - name: Deploy
+        run: |
+          kubectl apply -f kubernetes/tasky-secret.yaml
+          kubectl apply -f kubernetes/tasky-deployment.yaml
+          kubectl apply -f kubernetes/tasky-service.yaml
+
+      - name: Verify rollout
+        run: |
+          kubectl rollout status deployment/tasky -n wiz
